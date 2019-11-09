@@ -1,0 +1,48 @@
+#Linear and polyomial regression analysis to understand relationship between homelessness and rent, years 2011-2019 for Austin Texas
+
+import statsmodels.formula.api as smf
+import statsmodels as sm
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+#Trial with linear regression, y=Rent Jungle all bedrooms average rent $, x = annual point in time homeless count
+Y = [977,1133,1152,1260,1338,1448,1420,1452,1541]
+X = [2362,2244,2090,1987,1832,2138,2036,2147,2255]
+model = smf.OLS(Y,X)
+results = model.fit()
+
+mod = smf.OLS(Y, X)
+
+res = mod.fit()
+
+print(res.summary())
+#r squared of .091 is very unpredictive, try with polynomial regression next
+
+#try again for for polynomial regression
+rent = np.array([977,1133,1152,1260,1338,1448,1420,1452,1541])
+homeless = np.array([2362,2244,2090,1987,1832,2138,2036,2147,2255])
+degree = 3
+weights = np.polyfit(rent, homeless, degree)
+
+model = np.poly1d(weights)
+
+df = pd.DataFrame(columns=['homeless', 'rent'])
+df['rent'] = rent
+df['homeless'] = homeless
+
+#run polynomial regression
+weights = np.polyfit(rent, homeless, degree)
+model = np.poly1d(weights)
+results = smf.ols(formula='homeless ~ model(rent)', data=df).fit()
+
+sns.set(color_codes=True)
+
+results.summary()
+#r squared of .78 is very good, Prob (F-statistic) and p-value are both less than .05, passing null hypothesis test
+#Durbin test is above 2, so it is not auroregressive, ok for time series
+
+#plot polynomial graph
+ax = sns.regplot(x="rent", y="homeless", data=df,
+scatter_kws={"s": 80},
+order=2, ci=None, truncate=True)
